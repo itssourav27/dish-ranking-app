@@ -17,13 +17,21 @@ import dishes from "../data/dishes.json";
 import type { Dish } from "../types";
 import { ErrorBoundary } from './ErrorBoundary';
 
-// Import all images with proper typing
-const dishImages = import.meta.glob('../assets/dishes/*.jpg', { 
-  eager: true,
-  import: 'default'
-}) as Record<string, string>;
+// Import all images statically
+const importImages = async () => {
+  const images: Record<string, string> = {};
+  const imageModules = import.meta.glob('/src/assets/dishes/*.jpg', { eager: true });
+  
+  Object.entries(imageModules).forEach(([path, module]) => {
+    const fileName = path.split('/').pop() || '';
+    images[fileName] = (module as { default: string }).default;
+  });
+  
+  return images;
+};
 
 export const DishesPage: React.FC = () => {
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [tab, setTab] = useState(0);
   const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -34,22 +42,20 @@ export const DishesPage: React.FC = () => {
     if (!currentUser) {
       navigate("/login");
       return;
-    }
-
-    // Map the dishes with correct image URLs and preload images
-    const dishesWithImages = dishes.dishes.map(dish => {
-      const imagePath = `/src/assets/dishes/${dish.image}`;
-      const imageUrl = dishImages[imagePath] || `/src/assets/dishes/${dish.image}`;
+    }    // Load images and update dishes
+    const loadImagesAndUpdateDishes = async () => {
+      const loadedImages = await importImages();
+      setImageUrls(loadedImages);
       
-      // Pre-load the image
-      const img = new Image();
-      img.src = imageUrl;
-      
-      return {
+      const dishesWithImages = dishes.dishes.map(dish => ({
         ...dish,
-        image: imageUrl
-      };
-    });
+        image: loadedImages[dish.image] || '/src/assets/dishes/default-dish.jpg'
+      }));
+      
+      setDishes(dishesWithImages);
+    };
+    
+    loadImagesAndUpdateDishes();
 
     setDishes(dishesWithImages);
   }, [currentUser, navigate, setDishes]);

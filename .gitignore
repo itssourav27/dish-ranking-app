@@ -19,6 +19,15 @@ dist-ssr
 .env.test.local
 .env.production.local
 
+# Vercel
+.vercel
+.next
+
+# Build files
+dist/
+dist-ssr/
+.cache/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

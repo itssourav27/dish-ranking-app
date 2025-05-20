@@ -35,7 +35,8 @@ const globalStyles = `
 export const DishList: React.FC = () => {
   const [loadingImages, setLoadingImages] = useState<Record<number, boolean>>({});
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
-
+  const [retryCount, setRetryCount] = useState<Record<number, number>>({});
+  
   const dishes = useDishStore((state) => state.dishes);
   const votes = useDishStore((state) => state.votes);
   const voteForDish = useDishStore((state) => state.voteForDish);
@@ -52,13 +53,25 @@ export const DishList: React.FC = () => {
     };
 
   const handleImageLoad = (dishId: number) => {
-    setLoadingImages((prev) => ({ ...prev, [dishId]: false }));
-    setImageErrors((prev) => ({ ...prev, [dishId]: false }));
+    setLoadingImages(prev => ({ ...prev, [dishId]: false }));
+    setImageErrors(prev => ({ ...prev, [dishId]: false }));
+    setRetryCount(prev => ({ ...prev, [dishId]: 0 }));
   };
 
   const handleImageError = (dishId: number) => {
-    setLoadingImages((prev) => ({ ...prev, [dishId]: false }));
-    setImageErrors((prev) => ({ ...prev, [dishId]: true }));
+    setLoadingImages(prev => ({ ...prev, [dishId]: false }));
+    
+    // Implement retry logic
+    const currentRetries = retryCount[dishId] || 0;
+    if (currentRetries < 2) {
+      setRetryCount(prev => ({ ...prev, [dishId]: currentRetries + 1 }));
+      // Trigger a retry by updating the error state
+      setTimeout(() => {
+        setImageErrors(prev => ({ ...prev, [dishId]: false }));
+      }, 1000);
+    } else {
+      setImageErrors(prev => ({ ...prev, [dishId]: true }));
+    }
   };
 
   return (
