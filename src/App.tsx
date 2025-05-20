@@ -4,13 +4,13 @@ import {
   Navigate,
   useNavigate,
   useRouteError,
-  isRouteErrorResponse
+  isRouteErrorResponse,
 } from "react-router-dom";
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import { Login } from "./components/Login";
 import { DishesPage } from "./components/DishesPage";
 import "./App.css";
@@ -20,27 +20,29 @@ function ErrorBoundary() {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "100vh",
-      bgcolor: "#fff3e0",
-      p: 3
-    }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        bgcolor: "#fff3e0",
+        p: 3,
+      }}
+    >
       <Typography variant="h4" color="error" gutterBottom>
         Oops! Something went wrong
       </Typography>
-      <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
+      <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
         {isRouteErrorResponse(error)
           ? `${error.status} ${error.statusText}`
-          : 'An unexpected error occurred'}
+          : "An unexpected error occurred"}
       </Typography>
       <Button
         variant="contained"
         color="primary"
-        onClick={() => navigate('/')}
+        onClick={() => navigate("/")}
         sx={{ mt: 2 }}
       >
         Go back to home
@@ -99,7 +101,7 @@ const appRouter = createBrowserRouter([
     path: "/dishes",
     element: <DishesPage />,
     errorElement: <ErrorBoundary />,
-  }
+  },
 ]);
 
 export default function App() {

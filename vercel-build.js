@@ -1,15 +1,22 @@
-const fs = require('fs');
-const path = require('path');
+import { mkdir, copyFile, readdir, access } from 'fs/promises';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-// Ensure build directory exists
-const buildDir = path.join(__dirname, 'dist');
-if (!fs.existsSync(buildDir)) {
-    fs.mkdirSync(buildDir, { recursive: true });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+async function ensureDir(dir) {
+    try {
+        await access(dir);
+    } catch {
+        await mkdir(dir, { recursive: true });
+    }
 }
 
-// Copy assets to build directory
-const assetsDir = path.join(__dirname, 'src', 'assets');
-const buildAssetsDir = path.join(buildDir, 'assets');
+async function copyAssets() {
+    const buildDir = join(__dirname, 'dist');
+    const assetsDir = join(__dirname, 'src', 'assets');
+    const buildAssetsDir = join(buildDir, 'assets');
 
 if (!fs.existsSync(buildAssetsDir)) {
     fs.mkdirSync(buildAssetsDir, { recursive: true });
@@ -19,18 +26,26 @@ if (!fs.existsSync(buildAssetsDir)) {
 const dishesDir = path.join(assetsDir, 'dishes');
 const buildDishesDir = path.join(buildAssetsDir, 'dishes');
 
-if (!fs.existsSync(buildDishesDir)) {
-    fs.mkdirSync(buildDishesDir, { recursive: true });
+try {
+    await ensureDir(buildDishesDir);
+    
+    // Get all jpg files
+    const files = await readdir(dishesDir);
+    const jpgFiles = files.filter(file => file.endsWith('.jpg'));
+    
+    // Copy all jpg files
+    await Promise.all(jpgFiles.map(file => {
+        return copyFile(
+            join(dishesDir, file),
+            join(buildDishesDir, file)
+        );
+    }));
+    
+    console.log('Build assets copied successfully!');
+} catch (error) {
+    console.error('Error copying assets:', error);
+    process.exit(1);
 }
 
-// Copy all jpg files
-fs.readdirSync(dishesDir)
-    .filter(file => file.endsWith('.jpg'))
-    .forEach(file => {
-        fs.copyFileSync(
-            path.join(dishesDir, file),
-            path.join(buildDishesDir, file)
-        );
-    });
-
-console.log('Build assets copied successfully!');
+// Run the function
+copyAssets();

@@ -88,7 +88,9 @@ export const useDishStore = create<DishState>((set, get) => ({
 
     // Reset dish to original image
     const updatedDishes = state.dishes.map((dish) =>
-      dish.id === dishId ? { ...dish, image: dish.customImage || dish.image } : dish
+      dish.id === dishId
+        ? { ...dish, image: dish.customImage || dish.image }
+        : dish
     );
 
     set({ customImages: newCustomImages, dishes: updatedDishes });

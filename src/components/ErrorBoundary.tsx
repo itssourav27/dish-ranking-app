@@ -1,5 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Box, Typography, Button } from "@mui/material";
 
 interface Props {
   children: ReactNode;
@@ -13,15 +13,20 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null
+    error: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
-
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    console.error("Uncaught error:", error);
+    console.error("Error Info:", errorInfo);
+
+    // Reset error state after a delay to allow retry
+    setTimeout(() => {
+      this.setState({ hasError: false, error: null });
+    }, 3000);
   }
 
   public render() {
@@ -29,22 +34,22 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '200px',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "200px",
             padding: 3,
-            backgroundColor: '#fff8e1',
+            backgroundColor: "#fff8e1",
             borderRadius: 2,
-            border: '1px solid #ffa726'
+            border: "1px solid #ffa726",
           }}
         >
           <Typography variant="h6" color="error" gutterBottom>
             Something went wrong
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {this.state.error?.message || 'An unexpected error occurred'}
+            {this.state.error?.message || "An unexpected error occurred"}
           </Typography>
           <Button
             variant="contained"
