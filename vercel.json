@@ -3,7 +3,6 @@
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "regions": ["all"],
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -23,5 +22,8 @@
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "VITE_PEXELS_API_KEY": "@pexels_api_key"
+  }
 }

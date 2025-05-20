@@ -23,15 +23,17 @@ async function copyAssets() {
     });
 
     // Copy all jpg files
-    const files = fs.readdirSync(dishesDir);
-    const jpgFiles = files.filter((file) => file.endsWith(".jpg"));
+    if (fs.existsSync(dishesDir)) {
+      const files = fs.readdirSync(dishesDir);
+      const jpgFiles = files.filter((file) => file.endsWith(".jpg"));
 
-    jpgFiles.forEach((file) => {
-      const sourcePath = path.join(dishesDir, file);
-      const destPath = path.join(buildDishesDir, file);
-      fs.copyFileSync(sourcePath, destPath);
-      console.log(`Copied: ${file}`);
-    });
+      jpgFiles.forEach((file) => {
+        const sourcePath = path.join(dishesDir, file);
+        const destPath = path.join(buildDishesDir, file);
+        fs.copyFileSync(sourcePath, destPath);
+        console.log(`Copied: ${file}`);
+      });
+    }
 
     console.log("Build assets copied successfully!");
   } catch (error) {
