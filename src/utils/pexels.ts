@@ -1,5 +1,9 @@
-import { createClient } from 'pexels/dist/main.js';
+import { createClient, Photo } from 'pexels';
 import { PEXELS_API_KEY } from "../config/keys";
+
+if (!PEXELS_API_KEY) {
+  throw new Error("VITE_PEXELS_API_KEY must be set in .env");
+}
 
 const pexels = createClient(PEXELS_API_KEY);
 
@@ -19,6 +23,11 @@ const searchTermMap: { [key: string]: string } = {
 
 // Simple function to get a verified image URL
 export async function searchImage(query: string): Promise<string> {
+  if (!pexels) {
+    console.error("Pexels client not initialized - missing API key");
+    return getFallbackImage(query);
+  }
+
   try {
     const dishName = query.toLowerCase();
     const searchTerm = searchTermMap[dishName] || `${query} indian food dish`;
@@ -32,13 +41,13 @@ export async function searchImage(query: string): Promise<string> {
 
     if ("error" in result) {
       console.error("Error fetching image from Pexels:", result.error);
-      throw new Error("Pexels API error");
+      return getFallbackImage(query);
     }
 
     const photos = result.photos;
     if (photos && photos.length > 0) {
       // Filter for food photos only
-      const foodPhotos = photos.filter(photo => {
+      const foodPhotos = photos.filter((photo: Photo) => {
         const alt = (photo.alt || "").toLowerCase();
         // Only include photos that are clearly food/dish related
         const isFoodPhoto = alt.includes("food") || 
@@ -68,9 +77,18 @@ export async function searchImage(query: string): Promise<string> {
       return firstFewPhotos[randomIndex].src.large;
     }
 
-    throw new Error("No photos found");
+    return getFallbackImage(query);
   } catch (error) {
     console.error("Error fetching image from Pexels:", error);
-    throw error;
+    return getFallbackImage(query);
   }
+}
+
+function getFallbackImage(query: string): string {
+  const fallbackImages: { [key: string]: string } = {
+    "butter chicken": "https://images.pexels.com/photos/7625056/pexels-photo-7625056.jpeg",
+    default: "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg",
+  };
+  
+  return fallbackImages[query.toLowerCase()] || fallbackImages.default;
 }
