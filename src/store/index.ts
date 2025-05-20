@@ -2,6 +2,16 @@ import { create } from "zustand";
 import { Dish, Vote } from "../types";
 import users from "../data/users.json";
 
+// Helper functions for localStorage
+const loadVotesFromStorage = (): Vote[] => {
+  const savedVotes = localStorage.getItem("dishVotes");
+  return savedVotes ? JSON.parse(savedVotes) : [];
+};
+
+const saveVotesToStorage = (votes: Vote[]) => {
+  localStorage.setItem("dishVotes", JSON.stringify(votes));
+};
+
 interface AuthState {
   currentUser: string | null;
   login: (username: string, password: string) => boolean;
@@ -38,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 export const useDishStore = create<DishState>((set, get) => ({
   dishes: [],
-  votes: [],
+  votes: loadVotesFromStorage(), // Initialize with saved votes
   setDishes: (dishes) => set({ dishes }),
   voteForDish: (dishId, rank) => {
     const state = get();
@@ -56,20 +66,24 @@ export const useDishStore = create<DishState>((set, get) => ({
     );
 
     // Add the new vote
-    set({
-      votes: [...filteredVotes, { userId, dishId, rank }],
-    });
+    const newVotes = [...filteredVotes, { userId, dishId, rank }];
+
+    // Save to state and localStorage
+    set({ votes: newVotes });
+    saveVotesToStorage(newVotes);
   },
   clearVote: (dishId) => {
     const state = get();
     const userId = useAuthStore.getState().currentUser;
     if (!userId) return;
 
-    set({
-      votes: state.votes.filter(
-        (v) => !(v.userId === userId && v.dishId === dishId)
-      ),
-    });
+    const newVotes = state.votes.filter(
+      (v) => !(v.userId === userId && v.dishId === dishId)
+    );
+
+    // Save to state and localStorage
+    set({ votes: newVotes });
+    saveVotesToStorage(newVotes);
   },
   getRankings: () => {
     const state = get();
