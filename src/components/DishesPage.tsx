@@ -9,7 +9,6 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import axios from "axios";
 import { useAuthStore, useDishStore } from "../store";
 import { useNavigate } from "react-router-dom";
 import { DishList } from "./DishList";

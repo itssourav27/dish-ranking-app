@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Dish, User, Vote } from "../types";
+import { Dish, Vote } from "../types";
 import users from "../data/users.json";
 
 interface AuthState {
@@ -18,18 +18,22 @@ interface DishState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  currentUser: null,
+  currentUser: localStorage.getItem('currentUser'),
   login: (username: string, password: string) => {
     const user = users.users.find(
       (u) => u.username === username && u.password === password
     );
     if (user) {
+      localStorage.setItem('currentUser', username);
       set({ currentUser: username });
       return true;
     }
     return false;
   },
-  logout: () => set({ currentUser: null }),
+  logout: () => {
+    localStorage.removeItem('currentUser');
+    set({ currentUser: null });
+  },
 }));
 
 export const useDishStore = create<DishState>((set, get) => ({
