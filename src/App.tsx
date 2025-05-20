@@ -1,23 +1,63 @@
 import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
+  createBrowserRouter,
+  RouterProvider,
   Navigate,
+  useNavigate,
+  useRouteError,
+  isRouteErrorResponse
 } from "react-router-dom";
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import { Login } from "./components/Login";
 import { DishesPage } from "./components/DishesPage";
 import "./App.css";
 
+function ErrorBoundary() {
+  const error = useRouteError();
+  const navigate = useNavigate();
+
+  return (
+    <Box sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
+      bgcolor: "#fff3e0",
+      p: 3
+    }}>
+      <Typography variant="h4" color="error" gutterBottom>
+        Oops! Something went wrong
+      </Typography>
+      <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3 }}>
+        {isRouteErrorResponse(error)
+          ? `${error.status} ${error.statusText}`
+          : 'An unexpected error occurred'}
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate('/')}
+        sx={{ mt: 2 }}
+      >
+        Go back to home
+      </Button>
+    </Box>
+  );
+}
+
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#d84315", // Deep Orange
+      main: "#d84315",
       light: "#ff7543",
       dark: "#9f0000",
     },
     secondary: {
-      main: "#ffa726", // Orange
+      main: "#ffa726",
       light: "#ffd95b",
       dark: "#c77800",
     },
@@ -43,19 +83,30 @@ const theme = createTheme({
   },
 });
 
-function App() {
+// Create router with modern Data APIs
+const appRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: "/dishes",
+    element: <DishesPage />,
+    errorElement: <ErrorBoundary />,
+  }
+]);
+
+export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/dishes" element={<DishesPage />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
+      <RouterProvider router={appRouter} />
     </ThemeProvider>
   );
 }
-
-export default App;

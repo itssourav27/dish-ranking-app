@@ -9,6 +9,7 @@ export interface Dish {
   description: string;
   searchTerm: string;
   image?: string;
+  customImage?: string; // For user uploaded images
   points?: number;
   userRank?: number;
 }

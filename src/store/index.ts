@@ -12,6 +12,15 @@ const saveVotesToStorage = (votes: Vote[]) => {
   localStorage.setItem("dishVotes", JSON.stringify(votes));
 };
 
+const loadCustomImagesFromStorage = (): { [key: number]: string } => {
+  const savedImages = localStorage.getItem("customImages");
+  return savedImages ? JSON.parse(savedImages) : {};
+};
+
+const saveCustomImagesToStorage = (images: { [key: number]: string }) => {
+  localStorage.setItem("customImages", JSON.stringify(images));
+};
+
 interface AuthState {
   currentUser: string | null;
   login: (username: string, password: string) => boolean;
@@ -21,10 +30,13 @@ interface AuthState {
 interface DishState {
   dishes: Dish[];
   votes: Vote[];
+  customImages: { [key: number]: string };
   setDishes: (dishes: Dish[]) => void;
   voteForDish: (dishId: number, rank: number) => void;
   clearVote: (dishId: number) => void;
   getRankings: () => Dish[];
+  setCustomImage: (dishId: number, imageUrl: string) => void;
+  removeCustomImage: (dishId: number) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -48,8 +60,40 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 export const useDishStore = create<DishState>((set, get) => ({
   dishes: [],
-  votes: loadVotesFromStorage(), // Initialize with saved votes
-  setDishes: (dishes) => set({ dishes }),
+  votes: loadVotesFromStorage(),
+  customImages: loadCustomImagesFromStorage(),
+  setDishes: (dishes) => {
+    const customImages = get().customImages;
+    const dishesWithCustomImages = dishes.map((dish) => ({
+      ...dish,
+      image: customImages[dish.id] || dish.image,
+    }));
+    set({ dishes: dishesWithCustomImages });
+  },
+  setCustomImage: (dishId: number, imageUrl: string) => {
+    const state = get();
+    const newCustomImages = { ...state.customImages, [dishId]: imageUrl };
+
+    // Update dishes with new custom image
+    const updatedDishes = state.dishes.map((dish) =>
+      dish.id === dishId ? { ...dish, image: imageUrl } : dish
+    );
+
+    set({ customImages: newCustomImages, dishes: updatedDishes });
+    saveCustomImagesToStorage(newCustomImages);
+  },
+  removeCustomImage: (dishId: number) => {
+    const state = get();
+    const { [dishId]: removed, ...newCustomImages } = state.customImages;
+
+    // Reset dish to original image
+    const updatedDishes = state.dishes.map((dish) =>
+      dish.id === dishId ? { ...dish, image: dish.customImage || dish.image } : dish
+    );
+
+    set({ customImages: newCustomImages, dishes: updatedDishes });
+    saveCustomImagesToStorage(newCustomImages);
+  },
   voteForDish: (dishId, rank) => {
     const state = get();
     const userId = useAuthStore.getState().currentUser;

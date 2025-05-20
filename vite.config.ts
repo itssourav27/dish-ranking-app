@@ -1,33 +1,31 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: './',
   build: {
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
-      strictRequires: true,
-      // Add packages that need CommonJS transformation
-      esmExternals: ['pexels']
     },
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['pexels', 'react', 'react-dom', 'react-router-dom', '@mui/material']
+          vendor: ['react', 'react-dom', 'react-router-dom', '@mui/material']
         }
       }
-    },
-    sourcemap: true
+    }
   },
-  optimizeDeps: {
-    include: ['pexels']
+  server: {
+    port: 5173,
+    open: true
   },
-  esbuild: {
-    // Enable top level await
-    supported: {
-      'top-level-await': true
+  assetsInclude: ['**/*.jpg', '**/*.png', '**/*.jpeg'],
+  resolve: {
+    alias: {
+      '@': '/src',
+      '@assets': '/src/assets'
     }
   }
 })
