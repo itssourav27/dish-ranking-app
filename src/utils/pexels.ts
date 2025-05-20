@@ -1,4 +1,4 @@
-import { createClient } from "pexels";
+import { createClient } from 'pexels/dist/main.js';
 import { PEXELS_API_KEY } from "../config/keys";
 
 const pexels = createClient(PEXELS_API_KEY);
