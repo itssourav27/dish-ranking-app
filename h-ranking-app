@@ -1,0 +1,5 @@
+[33m0934b96[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m feat: add loading state and error handling to DishesPage, enhance image loading in DishList, and update package dependencies
+[33mbce8c4b[m feat: enhance image loading with retry logic and update asset handling in build process
+[33mc25ae85[m Add ErrorBoundary component for handling errors in the application
+[33m3258aeb[m feat: implement localStorage voting persistence and initialize votes from storage
+[33m232c308[m feat: add new user 'sourav' with password for enhanced user data
