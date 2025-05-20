@@ -14,32 +14,64 @@ import { useNavigate } from "react-router-dom";
 import { DishList } from "./DishList";
 import { Rankings } from "./Rankings";
 
+// Fallback images if Pexels API fails
+const fallbackImages: { [key: string]: string } = {
+  "butter chicken":
+    "https://images.pexels.com/photos/7625056/pexels-photo-7625056.jpeg",
+  "default":
+    "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg",
+};
+
 export const DishesPage: React.FC = () => {
   const [tab, setTab] = useState(0);
   const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.currentUser);
   const logout = useAuthStore((state) => state.logout);
   const setDishes = useDishStore((state) => state.setDishes);
+  const [retryCount, setRetryCount] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     if (!currentUser) {
       navigate("/login");
       return;
     }
+
     const fetchDishes = async () => {
       try {
         const { dishes } = await import("../data/dishes.json");
+        const { searchImage } = await import("../utils/pexels");
+
         const dishesWithImages = await Promise.all(
           dishes.map(async (dish) => {
             try {
-              const { searchImage } = await import("../utils/pexels");
-              const imageUrl = await searchImage(dish.searchTerm);
-              return { ...dish, image: imageUrl };
+              // Try up to 3 times to get a good image
+              const attempts = retryCount[dish.searchTerm] || 0;
+              if (attempts < 3) {
+                try {
+                  const imageUrl = await searchImage(dish.searchTerm);
+                  return { ...dish, image: imageUrl };
+                } catch (error) {
+                  setRetryCount((prev) => ({
+                    ...prev,
+                    [dish.searchTerm]: (prev[dish.searchTerm] || 0) + 1,
+                  }));
+                  throw error;
+                }
+              }
+              // Use fallback after 3 failed attempts
+              return {
+                ...dish,
+                image:
+                  fallbackImages[dish.searchTerm.toLowerCase()] ||
+                  fallbackImages.default,
+              };
             } catch (error) {
               console.error(`Error loading image for ${dish.dishName}:`, error);
               return {
                 ...dish,
-                image: `https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg`,
+                image:
+                  fallbackImages[dish.searchTerm.toLowerCase()] ||
+                  fallbackImages.default,
               };
             }
           })
@@ -51,7 +83,7 @@ export const DishesPage: React.FC = () => {
     };
 
     fetchDishes();
-  }, [currentUser, navigate, setDishes]);
+  }, [currentUser, navigate, setDishes, retryCount]);
 
   const handleLogout = () => {
     logout();

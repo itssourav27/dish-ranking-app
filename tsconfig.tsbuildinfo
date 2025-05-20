@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/dishlist.tsx","./src/components/dishespage.tsx","./src/components/login.tsx","./src/components/rankings.tsx","./src/config/keys.ts","./src/store/index.ts","./src/types/index.ts","./src/utils/pexels.ts"],"errors":true,"version":"5.8.3"}
