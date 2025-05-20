@@ -18,8 +18,7 @@ import { Rankings } from "./Rankings";
 const fallbackImages: { [key: string]: string } = {
   "butter chicken":
     "https://images.pexels.com/photos/7625056/pexels-photo-7625056.jpeg",
-  "default":
-    "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg",
+  default: "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg",
 };
 
 export const DishesPage: React.FC = () => {
