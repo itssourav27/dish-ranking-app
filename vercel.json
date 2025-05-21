@@ -1,6 +1,6 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
   "headers": [
@@ -22,8 +22,7 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_PEXELS_API_KEY": "@pexels_api_key"
+  ],  "env": {
+    "VITE_PEXELS_API_KEY": "${VITE_PEXELS_API_KEY}"
   }
 }
