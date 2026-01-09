@@ -13,7 +13,7 @@ import {
   CircularProgress,
   Theme,
 } from "@mui/material";
-import { useDishStore } from "../store";
+import { useAuthStore, useDishStore } from "../store";
 
 export const DishList: React.FC = () => {
   const [loadingImages, setLoadingImages] = useState<{
@@ -28,6 +28,10 @@ export const DishList: React.FC = () => {
   const votes = useDishStore((state) => state.votes);
   const voteForDish = useDishStore((state) => state.voteForDish);
   const clearVote = useDishStore((state) => state.clearVote);
+  const currentUser = useAuthStore((state) => state.currentUser);
+
+  // Only consider the current user's votes
+  const userVotes = votes.filter((v) => v.userId === currentUser);
 
   useEffect(() => {
     // Pre-load all images when component mounts
@@ -282,8 +286,9 @@ export const DishList: React.FC = () => {
               >
                 <Select
                   value={
-                    votes.find((v) => v.dishId === dish.id)?.rank?.toString() ||
-                    ""
+                    userVotes
+                      .find((v) => v.dishId === dish.id)?.rank
+                      ?.toString() || ""
                   }
                   onChange={handleRankChange(dish.id)}
                   displayEmpty
