@@ -133,24 +133,26 @@ export const useDishStore = create<DishState>((set, get) => ({
   },
   getRankings: () => {
     const state = get();
-    const pointsMap = new Map<number, number>();
-
-    // Calculate points for each dish
-    state.votes.forEach((vote) => {
-      const points = vote.rank === 1 ? 30 : vote.rank === 2 ? 20 : 10;
-      pointsMap.set(vote.dishId, (pointsMap.get(vote.dishId) || 0) + points);
-    });
-
-    // Add points and user's rank to dishes
     const userId = useAuthStore.getState().currentUser;
-    return state.dishes
-      .map((dish) => ({
-        ...dish,
-        points: pointsMap.get(dish.id) || 0,
-        userRank: state.votes.find(
-          (v) => v.userId === userId && v.dishId === dish.id
-        )?.rank,
-      }))
-      .sort((a, b) => (b.points || 0) - (a.points || 0));
+    if (!userId) return [];
+
+    // Get only current user's votes
+    const userVotes = state.votes.filter((v) => v.userId === userId);
+
+    // Map user's voted dishes with their points
+    const rankedDishes = userVotes
+      .map((vote) => {
+        const dish = state.dishes.find((d) => d.id === vote.dishId);
+        if (!dish) return null;
+        const points = vote.rank === 1 ? 30 : vote.rank === 2 ? 20 : 10;
+        return {
+          ...dish,
+          points,
+          userRank: vote.rank,
+        } as Dish;
+      })
+      .filter((d) => d !== null) as Dish[];
+
+    return rankedDishes.sort((a, b) => (a.userRank || 0) - (b.userRank || 0));
   },
 }));

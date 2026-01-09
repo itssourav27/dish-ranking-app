@@ -14,8 +14,7 @@ import { useDishStore } from "../store";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 export const Rankings: React.FC = () => {
-  const getRankings = useDishStore((state) => state.getRankings);
-  const rankedDishes = getRankings();
+  const rankedDishes = useDishStore((state) => state.getRankings());
 
   const getRankIcon = (index: number) => {
     if (index === 0) {
