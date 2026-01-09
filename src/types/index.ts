@@ -7,7 +7,7 @@ export interface Dish {
   id: number;
   dishName: string;
   description: string;
-  searchTerm: string;
+  searchTerm?: string;
   image?: string;
   customImage?: string; // For user uploaded images
   points?: number;
