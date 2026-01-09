@@ -14,28 +14,22 @@ import { useAuthStore, useDishStore } from "../store";
 import { useNavigate } from "react-router-dom";
 import { DishList } from "./DishList";
 import { Rankings } from "./Rankings";
-import dishes from "../data/dishes.json";
 import type { Dish } from "../types";
+import defaultDish from "../assets/dishes/default-dish.jpg";
 import { ErrorBoundary } from "./ErrorBoundary";
 
-// Import all images statically
-const importImages = async () => {
-  const images: Record<string, string> = {};
-  const imageModules = import.meta.glob("../assets/dishes/*.jpg", {
-    eager: true,
-  });
-
-  Object.entries(imageModules).forEach(([path, module]) => {
-    const fileName = path.split("/").pop() || "";
-    images[fileName] = (module as { default: string }).default;
-    console.log(`Loaded image: ${fileName} -> ${images[fileName]}`); // Debug log
-  });
-
-  return images;
+// Fetch dishes from public API
+const fetchDishes = async (): Promise<Dish[]> => {
+  const res = await fetch("/dishes.json");
+  if (!res.ok) throw new Error("Failed to fetch dishes");
+  const data = (await res.json()) as Dish[];
+  return data.map((d) => ({
+    ...d,
+    image: d.image || defaultDish,
+  }));
 };
 
 export const DishesPage: React.FC = () => {
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
@@ -50,30 +44,14 @@ export const DishesPage: React.FC = () => {
       return;
     }
 
-    const loadImagesAndUpdateDishes = async () => {
+    const loadDishes = async () => {
       setIsLoading(true);
       setLoadError(null);
       try {
-        const loadedImages = await importImages();
-
-        if (Object.keys(loadedImages).length === 0) {
-          throw new Error("Failed to load dish images");
-        }
-
-        setImageUrls(loadedImages);
-
-        const dishesWithImages = dishes.map((dish) => {
-          const fileName = dish.image.split("/").pop() || dish.image;
-          return {
-            ...dish,
-            image:
-              loadedImages[fileName] || "/src/assets/dishes/default-dish.jpg",
-          };
-        });
-
-        setDishes(dishesWithImages);
+        const apiDishes = await fetchDishes();
+        setDishes(apiDishes);
       } catch (error) {
-        console.error("Error loading images:", error);
+        console.error("Error loading dishes:", error);
         setLoadError(
           error instanceof Error ? error.message : "Failed to load dishes"
         );
@@ -82,7 +60,7 @@ export const DishesPage: React.FC = () => {
       }
     };
 
-    loadImagesAndUpdateDishes();
+    loadDishes();
   }, [currentUser, navigate, setDishes]);
 
   const handleLogout = () => {
