@@ -42,7 +42,7 @@ interface DishState {
 export const useAuthStore = create<AuthState>((set) => ({
   currentUser: localStorage.getItem("currentUser"),
   login: (username: string, password: string) => {
-    const user = users.users.find(
+    const user = users.find(
       (u) => u.username === username && u.password === password
     );
     if (user) {

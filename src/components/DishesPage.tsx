@@ -62,7 +62,7 @@ export const DishesPage: React.FC = () => {
 
         setImageUrls(loadedImages);
 
-        const dishesWithImages = dishes.dishes.map((dish) => {
+        const dishesWithImages = dishes.map((dish) => {
           const fileName = dish.image.split("/").pop() || dish.image;
           return {
             ...dish,
